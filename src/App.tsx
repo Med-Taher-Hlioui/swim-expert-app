@@ -22,7 +22,6 @@ function App() {
   const [customWorkout, setCustomWorkout] = useState('');
   const [isAddingCustom, setIsAddingCustom] = useState(false);
 
-  // Expanded State for all events
   const [pbs, setPbs] = useState<any>(() => {
     const events = [
       'free50', 'free100', 'free200', 'free400', 'free800', 'free1500',
@@ -52,12 +51,6 @@ function App() {
     setNewTime('');
   };
 
-  const deleteWorkout = (index: number) => {
-    const updated = savedWorkouts.filter((_, i) => i !== index);
-    setSavedWorkouts(updated);
-    localStorage.setItem('swim_workouts', JSON.stringify(updated));
-  };
-
   const saveCurrentWorkout = (text: string) => {
     if (!text) return;
     const updated = [text, ...savedWorkouts];
@@ -68,7 +61,12 @@ function App() {
     setIsAddingCustom(false);
   };
 
-  // Personalized Badge Logic
+  const deleteWorkout = (index: number) => {
+    const updated = savedWorkouts.filter((_, i) => i !== index);
+    setSavedWorkouts(updated);
+    localStorage.setItem('swim_workouts', JSON.stringify(updated));
+  };
+
   const checkSub30 = () => {
     const sprintEvents = ['free50', 'fly50', 'back50', 'breast50'];
     return sprintEvents.some(event => {
@@ -78,7 +76,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-20">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-10">
       
       {selectedVideo && (
         <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md">
@@ -93,7 +91,10 @@ function App() {
 
       <header className="bg-blue-600 py-4 px-6 shadow-lg sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-black italic tracking-tighter uppercase">SwimExpert</h1>
+          <div className="flex flex-col items-start">
+            <h1 className="text-2xl font-black italic tracking-tighter uppercase leading-none">SwimExpert</h1>
+            <span className="text-[8px] font-bold uppercase tracking-widest text-blue-200 mt-1">Dev by M. Tahar Hlioui</span>
+          </div>
           <nav className="flex gap-4 md:gap-8 text-[10px] md:text-xs font-black uppercase tracking-widest">
             <button onClick={() => setActivePage('pool')} className={activePage === 'pool' ? 'text-white border-b-2' : 'opacity-60'}>Pool</button>
             <button onClick={() => setActivePage('drills')} className={activePage === 'drills' ? 'text-white border-b-2' : 'opacity-60'}>Drills</button>
@@ -105,12 +106,13 @@ function App() {
 
       <main className="max-w-6xl mx-auto p-6 md:p-12">
         
+        {/* --- POOL (HOME) --- */}
         {activePage === 'pool' && (
           <div className="space-y-12 animate-in fade-in duration-700">
             <div className="bg-slate-900 border-l-8 border-blue-500 p-8 rounded-3xl shadow-xl flex gap-6 items-center text-left">
               <div className="text-left">
                 <h3 className="text-xs font-black uppercase tracking-widest text-blue-400 mb-1">Morning Briefing</h3>
-                <p className="text-lg italic text-slate-200 italic leading-relaxed">"{dailyTip}"</p>
+                <p className="text-lg italic text-slate-200">"{dailyTip}"</p>
               </div>
             </div>
 
@@ -123,13 +125,13 @@ function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left text-xs">
               <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-3xl">
-                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                  <span className="text-blue-500">●</span> News Rubrique
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 tracking-tight">
+                  <span className="text-blue-500">●</span> Swimming News
                 </h3>
                 <ul className="space-y-4">
-                  <li className="pb-2 border-b border-slate-800 italic opacity-80">Champions Tour: Sprints break record in Sousse →</li>
-                  <li className="pb-2 border-b border-slate-800 italic opacity-80">Nutrition: Why recovery starts before the pool →</li>
-                  <li className="italic opacity-80">FINA: New stroke regulations for 2026 →</li>
+                  <li className="pb-2 border-b border-slate-800 italic opacity-80 italic">Champions Tour: Sprints break record in Sousse →</li>
+                  <li className="pb-2 border-b border-slate-800 italic opacity-80 italic">Nutrition: Why recovery starts before the pool →</li>
+                  <li className="italic opacity-80 italic">FINA: New stroke regulations for 2026 →</li>
                 </ul>
               </div>
 
@@ -138,14 +140,19 @@ function App() {
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <span className="text-blue-500">●</span> Drills & Technique
                   </h3>
-                  <p className="text-slate-400 text-sm italic leading-relaxed">"Refine your form across all 4 strokes with our expert-led drill videos."</p>
+                  <p className="text-slate-400 text-sm italic leading-relaxed">
+                    "Refine your form across all 4 strokes with our expert-led drill videos."
+                  </p>
                 </div>
-                <button onClick={() => setActivePage('drills')} className="mt-6 text-blue-400 font-black text-[10px] uppercase tracking-widest flex items-center gap-2">Launch Library <span>→</span></button>
+                <button onClick={() => setActivePage('drills')} className="mt-6 text-blue-400 font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+                  Launch Library <span>→</span>
+                </button>
               </div>
             </div>
           </div>
         )}
 
+        {/* --- DRILLS --- */}
         {activePage === 'drills' && (
           <div className="space-y-16 animate-in slide-in-from-right-4 duration-500 text-left">
             <h2 className="text-3xl font-black italic border-l-4 border-blue-500 pl-6 uppercase tracking-tight">Technical Library</h2>
@@ -165,17 +172,18 @@ function App() {
           </div>
         )}
 
+        {/* --- WORKOUT --- */}
         {activePage === 'workout' && (
           <div className="space-y-12 animate-in zoom-in duration-300">
             <div className="max-w-4xl mx-auto bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl">
               <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-                <h2 className="text-2xl font-black italic text-blue-400 uppercase">Coach Console</h2>
-                <button onClick={() => setIsAddingCustom(!isAddingCustom)} className="text-[10px] font-black bg-blue-500/10 text-blue-400 px-4 py-2 rounded-lg uppercase">{isAddingCustom ? "Cancel" : "+ Add My Own"}</button>
+                <h2 className="text-2xl font-black italic text-blue-400 uppercase tracking-tight">Coach Console</h2>
+                <button onClick={() => setIsAddingCustom(!isAddingCustom)} className="text-[10px] font-black bg-blue-500/10 text-blue-400 px-4 py-2 rounded-lg uppercase tracking-widest">{isAddingCustom ? "Cancel" : "+ Add My Own"}</button>
               </div>
               {isAddingCustom ? (
-                <div className="space-y-4 text-left">
+                <div className="space-y-4 text-left text-xs">
                   <textarea placeholder="Type your set..." value={customWorkout} onChange={(e) => setCustomWorkout(e.target.value)} className="w-full h-64 bg-slate-950 border border-slate-800 rounded-2xl p-6 font-mono text-sm text-slate-300 outline-none focus:border-blue-500" />
-                  <button onClick={() => saveCurrentWorkout(customWorkout)} className="w-full bg-green-600 hover:bg-green-500 py-4 rounded-2xl font-black uppercase tracking-widest transition-all">Save Custom Set</button>
+                  <button onClick={() => saveCurrentWorkout(customWorkout)} className="w-full bg-green-600 hover:bg-green-500 py-4 rounded-2xl font-black uppercase tracking-widest">Save Custom Set</button>
                 </div>
               ) : (
                 <>
@@ -193,7 +201,9 @@ function App() {
                       <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} className="bg-slate-800 p-3 rounded-xl font-bold border border-slate-700 outline-none" />
                     </div>
                   </div>
-                  <button onClick={async () => { setLoading(true); setWorkout(""); const res = await engine.generateWorkout(level, goal, duration); setWorkout(res); setLoading(false); }} className="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-blue-500 transition-all mb-4">{loading ? "Coach is thinking..." : "Generate AI Session"}</button>
+                  <button onClick={async () => { setLoading(true); setWorkout(""); const res = await engine.generateWorkout(level, goal, duration); setWorkout(res); setLoading(false); }} className="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-blue-500 transition-all mb-4">
+                    {loading ? "Coach is thinking..." : "Generate AI Session"}
+                  </button>
                   {workout && (
                     <div className="animate-in fade-in duration-500">
                       <div className="p-6 bg-slate-950 rounded-2xl text-left font-mono text-xs whitespace-pre-wrap leading-relaxed border border-blue-900/30 text-slate-300 mb-4">{workout}</div>
@@ -205,7 +215,7 @@ function App() {
             </div>
             <div className="max-w-4xl mx-auto space-y-6 text-left">
               <h3 className="text-xl font-black italic uppercase tracking-tight border-l-4 border-blue-500 pl-4">Training History</h3>
-              {savedWorkouts.length === 0 ? <p className="text-slate-500 italic text-sm">No saved workouts.</p> : (
+              {savedWorkouts.length === 0 ? <p className="text-slate-500 italic text-sm">Library is empty.</p> : (
                 <div className="grid grid-cols-1 gap-6">
                   {savedWorkouts.map((saved, index) => (
                     <div key={index} className="bg-slate-900 border border-slate-800 rounded-3xl p-8 relative group hover:border-blue-500/30">
@@ -219,24 +229,19 @@ function App() {
           </div>
         )}
 
+        {/* --- PROGRESS --- */}
         {activePage === 'progress' && (
           <div className="animate-in fade-in duration-500 text-left space-y-12">
             <h2 className="text-3xl font-black italic border-l-4 border-blue-500 pl-6 uppercase tracking-tight">Performance Log</h2>
-            
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-              {/* PB Grid: Reorganized into Stroke Categories for Clarity */}
               <div className="xl:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-3">
                 {Object.keys(pbs).map((key) => (
                   <div key={key} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-sm flex flex-col items-center">
-                    <div className="text-[9px] font-black text-blue-500 uppercase tracking-tighter mb-1 text-center">
-                      {key.replace('free', ' Freestyle').replace('fly', ' Butterfly').replace('back', ' Backstroke').replace('breast', ' Breaststroke')}
-                    </div>
+                    <div className="text-[9px] font-black text-blue-500 uppercase tracking-tighter mb-1 text-center">{key.replace('free', ' Freestyle').replace('fly', ' Butterfly').replace('back', ' Backstroke').replace('breast', ' Breaststroke')}</div>
                     <div className="text-xl font-black italic tracking-tighter">{pbs[key]}s</div>
                   </div>
                 ))}
               </div>
-
-              {/* Log Form and Badges */}
               <div className="space-y-6">
                 <div className="bg-blue-600/10 border border-blue-500/20 rounded-[2rem] p-6 shadow-2xl">
                   <h3 className="text-lg font-black italic mb-4 uppercase text-blue-400">Log Record</h3>
@@ -252,8 +257,6 @@ function App() {
                     <button onClick={savePB} className="bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-black uppercase text-xs transition-all shadow-lg">Save Record</button>
                   </div>
                 </div>
-
-                {/* Personalized Badges Section */}
                 <div className="bg-slate-900 p-6 rounded-[2rem] border border-slate-800">
                   <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-4 text-center">Badges</h3>
                   <div className="flex flex-wrap justify-center gap-4">
@@ -261,7 +264,6 @@ function App() {
                       <span className="text-2xl">⚡</span>
                       <span className="text-[8px] font-black uppercase">Sub-30 Sprint</span>
                     </div>
-                    {/* Add more badges here following the same pattern */}
                   </div>
                 </div>
               </div>
@@ -269,6 +271,16 @@ function App() {
           </div>
         )}
       </main>
+
+      <footer className="mt-10 mb-10 text-center space-y-2">
+        <div className="h-px w-24 bg-blue-600 mx-auto opacity-30"></div>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+          Built with <span className="text-blue-500">♥</span> by <span className="text-slate-200">Mohamed Tahar Hlioui</span>
+        </p>
+        <p className="text-[8px] font-bold text-slate-700 uppercase tracking-widest italic">
+          High-Performance AI Coaching • Sousse, Tunisia • 2026
+        </p>
+      </footer>
     </div>
   );
 }
