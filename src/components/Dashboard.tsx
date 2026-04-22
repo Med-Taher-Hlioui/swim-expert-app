@@ -28,8 +28,6 @@ export default function Dashboard({ setPage, xp, setXp, dailyTip, level }: Dashb
     ];
     const randomChallenge = challenges[Math.floor(Math.random() * challenges.length)];
     alert(`🎯 FUN MODE: ${randomChallenge}`);
-    
-    // This line uses the value from our xp.ts file
     setXp((prev: number) => prev + XP_REWARDS.FUN_MODE);
   };
 
@@ -38,6 +36,7 @@ export default function Dashboard({ setPage, xp, setXp, dailyTip, level }: Dashb
     { id: 'gear', name: 'Gear Locker', icon: '🎒', desc: 'Track technical suit compression and health.' },
     { id: 'nutrition', name: 'Fuel Deck', icon: '🥗', desc: 'Optimized pre-swim and recovery meals.' },
     { id: 'drills', name: 'Drill Library', icon: '📺', desc: 'Access elite technical video tutorials.' },
+    { id: 'dryland', name: 'Dryland Deck', icon: '🧘', desc: 'Elite mobility and power training sessions.' }, // NEW BOX
   ];
 
   return (
@@ -56,7 +55,7 @@ export default function Dashboard({ setPage, xp, setXp, dailyTip, level }: Dashb
       {/* 2. PERFORMANCE RADAR & HERO */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
         <div className="lg:col-span-1 bg-slate-900/50 p-6 rounded-[2.5rem] border border-slate-800 h-[350px]">
-          <h3 className="text-xs font-black uppercase tracking-widest text-blue-500 mb-4">Performance Radar</h3>
+          <h3 className="text-xs font-black uppercase tracking-widest text-blue-500 mb-4 text-white">Performance Radar</h3>
           <ResponsiveContainer width="100%" height="90%">
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
               <PolarGrid stroke="#334155" />
@@ -68,10 +67,10 @@ export default function Dashboard({ setPage, xp, setXp, dailyTip, level }: Dashb
 
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-gradient-to-br from-blue-600 to-indigo-900 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-            <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-2 leading-none text-white">The Deck is Yours.</h2>
+            <div className="relative z-10 text-white">
+              <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-2 leading-none">The Deck is Yours.</h2>
               <p className="text-blue-100 text-xs font-bold uppercase tracking-widest opacity-80 mb-6 italic">Sousse Elite Training Hub</p>
-              <button onClick={() => setPage('workout')} className="bg-white text-blue-700 px-8 py-3 rounded-full font-black uppercase text-xs shadow-xl hover:scale-105 transition-all">Generate Session</button>
+              <button onClick={() => setPage('workout')} className="bg-white text-blue-700 px-8 py-3 rounded-full font-black uppercase text-xs shadow-xl hover:scale-105 transition-all font-bold">Generate Session</button>
             </div>
             <div className="absolute -right-10 -bottom-10 text-[15rem] font-black italic text-white/5 select-none">GO</div>
           </div>
@@ -81,9 +80,9 @@ export default function Dashboard({ setPage, xp, setXp, dailyTip, level }: Dashb
               <div className="text-[10px] font-black text-slate-500 uppercase mb-1">XP Points</div>
               <div className="text-xl font-black italic text-blue-400">{xp}</div>
             </div>
-            <div className="bg-slate-900 p-5 rounded-3xl border border-slate-800">
+            <div className="bg-slate-900 p-5 rounded-3xl border border-slate-800 text-white">
               <div className="text-[10px] font-black text-slate-500 uppercase mb-1">Streak</div>
-              <div className="text-xl font-black italic text-white">5 Days</div>
+              <div className="text-xl font-black italic">5 Days</div>
             </div>
             <button onClick={triggerFunMode} className="bg-blue-600/10 border border-blue-500/30 p-5 rounded-3xl group hover:bg-blue-600/20 transition-all text-left">
               <div className="text-[10px] font-black text-blue-400 uppercase">Fun Mode</div>
@@ -97,8 +96,8 @@ export default function Dashboard({ setPage, xp, setXp, dailyTip, level }: Dashb
         </div>
       </div>
 
-      {/* 3. SUBPAGE GATEWAYS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 3. SUBPAGE GATEWAYS (Now with 5 boxes) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {subpages.map(page => (
           <button 
             key={page.id} 
@@ -111,7 +110,7 @@ export default function Dashboard({ setPage, xp, setXp, dailyTip, level }: Dashb
               <p className="text-[8px] text-slate-500 font-bold leading-tight uppercase tracking-widest">{page.desc}</p>
             </div>
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none">
-              <span className="text-6xl font-black italic uppercase tracking-tighter text-white">{page.id.slice(0, 3)}</span>
+              <span className="text-5xl font-black italic uppercase tracking-tighter text-white">{page.id.slice(0, 3)}</span>
             </div>
           </button>
         ))}
