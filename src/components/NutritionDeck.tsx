@@ -1,70 +1,101 @@
-export default function NutritionDeck() {
+interface NutritionProps {
+  role: 'athlete' | 'parent';
+  burned: number;
+  consumed: number;
+  hydration: number;
+  setBurned: (val: number) => void;
+  setConsumed: (val: number) => void;
+  setHydration: (val: number) => void;
+}
+
+export default function NutritionDeck({ role, burned, consumed, hydration, setBurned, setConsumed, setHydration }: NutritionProps) {
+  const target = 3500;
+  const totalRequired = target + burned;
+  const progress = (consumed / totalRequired) * 100;
+
+  const fuelGuide = [
+    { type: 'High Intensity (Red)', food: 'Pasta, Dates, Honey', timing: 'Race Day / Pre-Sprint', color: 'border-red-500 text-red-500' },
+    { type: 'Steady State (Yellow)', food: 'Brown Rice, Oats, Tuna', timing: '2h Before Practice', color: 'border-yellow-500 text-yellow-500' },
+    { type: 'Recovery (Green)', food: 'Grilled Fish, Chicken, Salad', timing: 'Post-Practice / Rest', color: 'border-green-500 text-green-500' },
+  ];
+
   return (
-    <div className="animate-in slide-in-from-bottom-8 duration-500 space-y-12 pb-20 text-left">
+    <div className="animate-in slide-in-from-bottom-8 duration-700 space-y-10 pb-20 text-left text-white">
       <div>
-        <h2 className="text-4xl font-black italic uppercase tracking-tighter text-blue-500">Nutrition Deck</h2>
-        <p className="text-slate-400 text-sm font-bold tracking-widest mt-2 uppercase">Fueling the High-Performance Athlete</p>
+        <h2 className="text-4xl font-black italic uppercase tracking-tighter text-emerald-500 leading-none">Fuel Deck</h2>
+        <p className="text-slate-400 text-sm font-bold tracking-widest mt-2 uppercase italic">Elite Nutrition & Hydration</p>
       </div>
 
+      {/* 1. ENERGY & HYDRATION OVERVIEW */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 p-8 rounded-[3rem] flex flex-col justify-center">
+          <div className="flex justify-between items-end mb-4">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Energy Balance</span>
+            <span className="text-2xl font-black italic text-white">{consumed} / {totalRequired} kcal</span>
+          </div>
+          <div className="w-full h-4 bg-slate-950 rounded-full border border-slate-800 overflow-hidden">
+            <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+          </div>
+        </div>
+
+        <div className="bg-blue-600/10 border border-blue-500/20 p-8 rounded-[3rem] space-y-4">
+          <div className="flex justify-between items-center text-blue-400">
+            <h3 className="text-xs font-black uppercase tracking-widest">Hydration</h3>
+            <span className="text-lg font-black italic">{(hydration / 1000).toFixed(1)}L</span>
+          </div>
+          <div className="flex gap-2">
+            {[500, 1000, 1500, 2000, 2500].map((v) => (
+              <button 
+                key={v}
+                onClick={() => setHydration(v)}
+                className={`flex-1 h-8 rounded-lg text-[10px] transition-all ${hydration >= v ? 'bg-blue-600' : 'bg-slate-950 border border-slate-800 text-slate-500'}`}
+              >💧</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. TRAFFIC LIGHT MEAL GUIDE */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {fuelGuide.map((item) => (
+          <div key={item.type} className={`bg-slate-900 border-2 p-6 rounded-[2.5rem] ${item.color.split(' ')[0]} bg-opacity-5`}>
+            <div className={`text-[10px] font-black uppercase mb-2 ${item.color.split(' ')[1]}`}>{item.type}</div>
+            <div className="text-lg font-black italic uppercase tracking-tighter mb-1">{item.food}</div>
+            <p className="text-[9px] font-bold text-slate-500 uppercase">{item.timing}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* 3. ATHLETE LOGGING & SUPPLEMENTS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 space-y-6">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl">⚡</span>
-            <div>
-              <h3 className="text-lg font-black italic uppercase">Pre-Swim Energy</h3>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">30-60 Mins Before</p>
-            </div>
+        <div className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] space-y-6">
+          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Log Training Burn</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <button onClick={() => setBurned(burned + 800)} className="bg-slate-950 border border-slate-800 p-6 rounded-2xl hover:border-emerald-500 transition-all text-center">
+              <span className="text-2xl block mb-2">🏊‍♂️</span>
+              <span className="text-[9px] font-black uppercase">Main Set</span>
+            </button>
+            <button onClick={() => setBurned(burned + 400)} className="bg-slate-950 border border-slate-800 p-6 rounded-2xl hover:border-emerald-500 transition-all text-center">
+              <span className="text-2xl block mb-2">🧘</span>
+              <span className="text-[9px] font-black uppercase">Dryland</span>
+            </button>
           </div>
-          <ul className="space-y-4">
-            <li className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-              <span className="text-xs font-bold">3-4 Deglet Nour Dates</span>
-              <span className="text-[10px] font-black text-blue-400 uppercase">Fast Carbs</span>
-            </li>
-            <li className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-              <span className="text-xs font-bold">1 Banana + Honey</span>
-              <span className="text-[10px] font-black text-blue-400 uppercase">Electrolytes</span>
-            </li>
-          </ul>
         </div>
 
-        <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 space-y-6">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl">🌊</span>
-            <div>
-              <h3 className="text-lg font-black italic uppercase">Recovery Window</h3>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Immediate Post-Swim</p>
+        <div className="bg-slate-900 border border-purple-500/20 p-8 rounded-[3rem] space-y-6 relative overflow-hidden">
+          <h3 className="text-xs font-black uppercase tracking-widest text-purple-400">Advanced Supplements (18+)</h3>
+          <div className="grid grid-cols-2 gap-4 relative z-10">
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+              <div className="text-[9px] font-black uppercase">Creatine</div>
+              <div className="text-[8px] text-slate-500 font-bold uppercase mt-1">3-5g for Power</div>
+            </div>
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+              <div className="text-[9px] font-black uppercase">Whey Isolate</div>
+              <div className="text-[8px] text-slate-500 font-bold uppercase mt-1">Muscle Repair</div>
             </div>
           </div>
-          <ul className="space-y-4">
-            <li className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-              <span className="text-xs font-bold">Grilled Sea Bream (Dorade)</span>
-              <span className="text-[10px] font-black text-green-400 uppercase">Lean Protein</span>
-            </li>
-            <li className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-              <span className="text-xs font-bold">Couscous with Veggies</span>
-              <span className="text-[10px] font-black text-green-400 uppercase">Glycogen Refill</span>
-            </li>
-          </ul>
+          <div className="absolute right-[-10px] bottom-[-10px] text-7xl font-black italic text-white opacity-[0.02] pointer-events-none uppercase">ADV</div>
         </div>
-      </div>
-
-      <div className="bg-blue-600/5 p-10 rounded-[3rem] border border-blue-500/20 grid grid-cols-1 md:grid-cols-3 gap-8">
-         <div className="space-y-2">
-           <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Daily Hydration</h4>
-           <div className="flex items-end gap-2">
-             <span className="text-3xl font-black italic">3.5</span>
-             <span className="text-sm font-bold text-slate-500 uppercase pb-1">Liters</span>
-           </div>
-           <div className="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
-             <div className="h-full w-[70%] bg-blue-500"></div>
-           </div>
-         </div>
-         <div className="md:col-span-2">
-           <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Coach's Nutrition Tip</h4>
-           <p className="text-xs text-slate-400 italic leading-relaxed">
-             "In Sousse heat, focus on magnesium-rich foods to prevent cramping. Use cold-pressed olive oil in your post-swim meals to reduce muscle inflammation naturally."
-           </p>
-         </div>
       </div>
     </div>
   );
