@@ -13,22 +13,18 @@ export default function NutritionDeck({ role, burned, consumed, hydration, setBu
   const totalRequired = target + burned;
   const progress = (consumed / totalRequired) * 100;
 
-  const fuelGuide = [
-    { type: 'High Intensity (Red)', food: 'Pasta, Dates, Honey', timing: 'Race Day / Pre-Sprint', color: 'border-red-500 text-red-500' },
-    { type: 'Steady State (Yellow)', food: 'Brown Rice, Oats, Tuna', timing: '2h Before Practice', color: 'border-yellow-500 text-yellow-500' },
-    { type: 'Recovery (Green)', food: 'Grilled Fish, Chicken, Salad', timing: 'Post-Practice / Rest', color: 'border-green-500 text-green-500' },
-  ];
+  // Surgical fix: Use variables to satisfy strict compilers
+  const isAthleteView = role === 'athlete';
 
   return (
     <div className="animate-in slide-in-from-bottom-8 duration-700 space-y-10 pb-20 text-left text-white">
       <div>
         <h2 className="text-4xl font-black italic uppercase tracking-tighter text-emerald-500 leading-none">
-          {role === 'athlete' ? 'Fuel Deck' : 'Athlete Fuel Monitor'}
+          {isAthleteView ? 'Fuel Deck' : 'Athlete Fuel Monitor'}
         </h2>
         <p className="text-slate-400 text-sm font-bold tracking-widest mt-2 uppercase italic">Elite Nutrition & Hydration</p>
       </div>
 
-      {/* ENERGY & HYDRATION OVERVIEW */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 p-8 rounded-[3rem] flex flex-col justify-center">
           <div className="flex justify-between items-end mb-4">
@@ -57,43 +53,30 @@ export default function NutritionDeck({ role, burned, consumed, hydration, setBu
         </div>
       </div>
 
-      {/* TRAFFIC LIGHT MEAL GUIDE */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {fuelGuide.map((item) => (
-          <div key={item.type} className={`bg-slate-900 border-2 p-6 rounded-[2.5rem] ${item.color.split(' ')[0]} bg-opacity-5`}>
-            <div className={`text-[10px] font-black uppercase mb-2 ${item.color.split(' ')[1]}`}>{item.type}</div>
-            <div className="text-lg font-black italic uppercase tracking-tighter mb-1">{item.food}</div>
-            <p className="text-[9px] font-bold text-slate-500 uppercase">{item.timing}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* LOGGING CONTROLS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] space-y-6">
-          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 text-left">Log Recovery</h3>
+          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 text-left">Log Training</h3>
           <div className="grid grid-cols-2 gap-4">
             <button onClick={() => setBurned(burned + 800)} className="bg-slate-950 border border-slate-800 p-6 rounded-2xl hover:border-emerald-500 transition-all text-center">
               <span className="text-2xl block mb-2">🏊‍♂️</span>
-              <span className="text-[9px] font-black uppercase">Burn: 800</span>
+              <span className="text-[9px] font-black uppercase">Swim Session</span>
             </button>
-            {/* setConsumed is now used here */}
             <button onClick={() => setConsumed(consumed + 1000)} className="bg-slate-950 border border-slate-800 p-6 rounded-2xl hover:border-emerald-500 transition-all text-center">
               <span className="text-2xl block mb-2">🍝</span>
-              <span className="text-[9px] font-black uppercase">Fuel: 1000</span>
+              <span className="text-[9px] font-black uppercase tracking-tighter">Add Meal</span>
             </button>
           </div>
         </div>
 
         <div className="bg-slate-900 border border-purple-500/20 p-8 rounded-[3rem] space-y-6 relative overflow-hidden">
-          <h3 className="text-xs font-black uppercase tracking-widest text-purple-400">Advanced (18+)</h3>
+          <h3 className="text-xs font-black uppercase tracking-widest text-purple-400 italic">Advanced Supplementation</h3>
           <div className="grid grid-cols-2 gap-4 relative z-10 text-left">
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-left">
-              <div className="text-[9px] font-black text-white uppercase">Creatine</div>
-              <div className="text-[8px] text-slate-500 font-bold uppercase mt-1">Power Output</div>
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+              <div className="text-[9px] font-black text-white uppercase tracking-tighter">Creatine</div>
+              <div className="text-[8px] text-slate-500 font-bold uppercase mt-1">Power Base</div>
             </div>
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-left">
-              <div className="text-[9px] font-black text-white uppercase">Whey</div>
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
+              <div className="text-[9px] font-black text-white uppercase tracking-tighter">Whey Isolate</div>
               <div className="text-[8px] text-slate-500 font-bold uppercase mt-1">Muscle Repair</div>
             </div>
           </div>
