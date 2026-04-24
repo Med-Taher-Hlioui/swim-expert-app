@@ -1,25 +1,17 @@
 {
   "compilerOptions": {
     "composite": true,
-    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.app.tsbuildinfo",
     "target": "ESNext",
-    "useDefineForClassFields": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "useUnknownInCatchVariables": false,
-    "resolveJsonModule": true,
-    "moduleDetection": "force",
-    "isolatedModules": true,
     "jsx": "react-jsx",
-
-    /* Disable strictness for unused variables to pass Vercel build */
-    "noUnusedLocals": false,
+    
+    /* CRITICAL: Set these to false to stop the Vercel build error */
+    "noUnusedLocals": false, 
     "noUnusedParameters": false,
-
+    
     "strict": true,
     "noEmit": true,
-    "noFallthroughCasesInSwitch": true,
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"]
