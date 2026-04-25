@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "@tailwindcss/vite": "^4.2.4",
     "canvas-confetti": "^1.9.3",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
@@ -17,7 +19,9 @@
     "recharts": "^2.12.2"
   },
   "devDependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@types/canvas-confetti": "^1.6.4",
+    "@types/node": "^25.6.0",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@vitejs/plugin-react": "^4.2.1",
