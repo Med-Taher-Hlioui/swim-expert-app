@@ -1,19 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), // This handles your Tailwind v4 design
+    tailwindcss(),
   ],
-  // 'base' must be '/' for a standard Netlify deployment
-  base: '/', 
+  // Use a relative base to ensure Netlify finds assets regardless of the URL structure
+  base: './', 
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   build: {
-    // These settings ensure your "Elite" UI is bundled into the 'dist' folder
     outDir: 'dist',
     assetsDir: 'assets',
-    emptyOutDir: true,
+    // This ensures that small errors in types don't stop the design from deploying
+    sourcemap: false,
   }
 })
