@@ -7,12 +7,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: '/', 
+  base: '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    // This replaces the "rm -rf" command - it cleans the folder automatically
-    emptyOutDir: true, 
-    sourcemap: false,
+    emptyOutDir: true,
   }
 })
