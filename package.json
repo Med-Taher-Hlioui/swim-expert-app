@@ -10,25 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "canvas-confetti": "^1.9.3",
+    "@google/generative-ai": "^0.21.0",
     "lucide-react": "^0.344.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "recharts": "^2.12.2"
   },
   "devDependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "@tailwindcss/postcss": "^4.2.4",
-    "@tailwindcss/vite": "^4.2.4",
-    "@types/canvas-confetti": "^1.6.4",
-    "@types/node": "^25.6.0",
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.5.0",
-    "postcss": "^8.5.10",
-    "tailwindcss": "^3.4.19",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.6"
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.18",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.1"
   }
 }
