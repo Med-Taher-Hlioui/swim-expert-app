@@ -1,11 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Restoring your Slate-950 Elite look */
-body {
-  margin: 0;
-  background-color: #020617; 
-  color: #f8fafc;
-  -webkit-font-smoothing: antialiased;
+/* If you use specific colors like emerald or slate, v4 knows them, 
+   but we can define them here if you want to be safe. */
+@theme {
+  --color-slate-950: #020617;
+  --color-emerald-500: #10b981;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-slate-950);
+    color: #f8fafc;
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
 }
