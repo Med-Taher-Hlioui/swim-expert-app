@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+// 1. Import Router Hooks
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Waves, 
   LayoutDashboard, 
@@ -14,44 +16,52 @@ import {
   Users,
   HeartPulse,
   ClipboardCheck,
-  Menu,
-  X
+  X,
+  Settings,
+  TrendingUp,
+  Microscope,
+  Timer,
+  Medal 
 } from 'lucide-react';
 import type { UserRole } from '../types/auth';
 
+// 2. Updated Props: We no longer need activePage or setActivePage here
 interface NavbarProps {
-  activePage: string;
-  setActivePage: (page: string) => void;
   userRole: UserRole;
 }
 
-export default function Navbar({ activePage, setActivePage, userRole }: NavbarProps) {
+export default function Navbar({ userRole }: NavbarProps) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false); // Controls the "slide"
+  const navigate = useNavigate(); // Hook for changing the URL
+  const location = useLocation(); // Hook for checking the current URL
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Helper to render nav items
-  const NavItem = ({ id, icon: Icon, labelKey }: { id: string, icon: any, labelKey: string }) => (
-    <button
-      onClick={() => {
-        setActivePage(id);
-        setIsOpen(false); // Close drawer after clicking
-      }}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-        activePage === id 
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-          : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
-      }`}
-    >
-      <Icon className={`w-5 h-5 ${activePage === id ? 'text-white' : 'group-hover:text-blue-400'}`} />
-      <span className="text-sm font-bold tracking-tight uppercase italic">
-        {t(labelKey)}
-      </span>
-    </button>
-  );
+  // 3. Updated NavItem: Now uses "path" and "location.pathname"
+  const NavItem = ({ path, icon: Icon, labelKey }: { path: string, icon: any, labelKey: string }) => {
+    const isActive = location.pathname === path;
+    
+    return (
+      <button
+        onClick={() => {
+          navigate(path); // Update the browser URL
+          setIsOpen(false);
+        }}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+          isActive 
+            ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
+            : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+        }`}
+      >
+        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'group-hover:text-blue-400'}`} />
+        <span className="text-sm font-bold tracking-tight uppercase italic text-start">
+          {t(labelKey)}
+        </span>
+      </button>
+    );
+  };
 
   return (
     <>
-      {/* 1. TRIGGER BUTTON (Visible when closed) */}
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
@@ -61,7 +71,6 @@ export default function Navbar({ activePage, setActivePage, userRole }: NavbarPr
         </button>
       )}
 
-      {/* 2. OVERLAY (Darkens the screen when menu is open) */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[55] transition-opacity"
@@ -69,19 +78,17 @@ export default function Navbar({ activePage, setActivePage, userRole }: NavbarPr
         />
       )}
 
-      {/* 3. THE SLIDING NAVBAR */}
       <aside className={`fixed inset-y-0 start-0 w-72 bg-slate-950 border-e border-slate-900 z-[60] flex flex-col p-6 transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'
       }`}>
         
-        {/* Header inside Navbar */}
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
             <div className="bg-blue-600 p-2 rounded-lg">
               <Waves className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tighter text-white">SOUSSE</h1>
+              <h1 className="text-lg font-black tracking-tighter text-white leading-none">SOUSSE</h1>
               <p className="text-[10px] font-black text-blue-500 uppercase italic">Elite Athletics</p>
             </div>
           </div>
@@ -94,45 +101,50 @@ export default function Navbar({ activePage, setActivePage, userRole }: NavbarPr
           {/* --- ATHLETE --- */}
           {userRole === 'athlete' && (
             <>
-              <NavItem id="pool" icon={LayoutDashboard} labelKey="dashboard" />
-              <NavItem id="strategy" icon={Trophy} labelKey="strategy" />
-              <NavItem id="gear" icon={ShoppingBag} labelKey="gear" />
-              <NavItem id="nutrition" icon={Utensils} labelKey="nutrition" />
-              <NavItem id="news" icon={Newspaper} labelKey="news" />
-              <NavItem id="drills" icon={BookOpen} labelKey="drills" />
-              <NavItem id="workout" icon={Zap} labelKey="workout" />
-              <NavItem id="dryland" icon={Dumbbell} labelKey="dryland" />
+              <NavItem path="/athlete/pool" icon={LayoutDashboard} labelKey="dashboard" />
+              <NavItem path="/athlete/strategy" icon={Trophy} labelKey="strategy" />
+              <NavItem path="/athlete/gear" icon={ShoppingBag} labelKey="gear" />
+              <NavItem path="/athlete/nutrition" icon={Utensils} labelKey="nutrition" />
+              <NavItem path="/athlete/news" icon={Newspaper} labelKey="news" />
+              <NavItem path="/athlete/drills" icon={BookOpen} labelKey="drills" />
+              <NavItem path="/athlete/workout" icon={Zap} labelKey="workout" />
+              <NavItem path="/athlete/dryland" icon={Dumbbell} labelKey="dryland" />
             </>
           )}
 
           {/* --- COACH --- */}
           {userRole === 'coach' && (
             <>
-              <NavItem id="squad" icon={Users} labelKey="squad" />
-              <NavItem id="drills" icon={BookOpen} labelKey="drills" />
-              <NavItem id="dryland" icon={Dumbbell} labelKey="dryland" />
-              <NavItem id="news" icon={Newspaper} labelKey="news" />
+              <NavItem path="/coach/squad" icon={LayoutDashboard} labelKey="squad" />
+              <NavItem path="/coach/manager" icon={Settings} labelKey="manager.title" />
+              <NavItem path="/coach/workload" icon={TrendingUp} labelKey="workload.title" />
+              <NavItem path="/coach/analysis" icon={Microscope} labelKey="lab.title" />
+              <NavItem path="/coach/chrono" icon={Timer} labelKey="chrono.title" />
+              <NavItem path="/coach/rankings" icon={Medal} labelKey="leaderboard.title" />
+              <NavItem path="/coach/drills" icon={BookOpen} labelKey="drills" />
+              <NavItem path="/coach/dryland" icon={Dumbbell} labelKey="dryland" />
+              <NavItem path="/coach/news" icon={Newspaper} labelKey="news" />
             </>
           )}
 
           {/* --- PARENT --- */}
           {userRole === 'parent' && (
             <>
-              <NavItem id="monitoring" icon={LayoutDashboard} labelKey="monitoring" />
-              <NavItem id="wellness" icon={HeartPulse} labelKey="wellness" />
-              <NavItem id="gear_audit" icon={ClipboardCheck} labelKey="gear_audit" />
-              <NavItem id="nutrition" icon={Utensils} labelKey="nutrition" />
-              <NavItem id="news" icon={Newspaper} labelKey="news" />
+              <NavItem path="/parent/monitoring" icon={LayoutDashboard} labelKey="monitoring" />
+              <NavItem path="/parent/wellness" icon={HeartPulse} labelKey="wellness" />
+              <NavItem path="/parent/gear_audit" icon={ClipboardCheck} labelKey="gear_audit" />
+              <NavItem path="/parent/nutrition" icon={Utensils} labelKey="nutrition" />
+              <NavItem path="/parent/news" icon={Newspaper} labelKey="news" />
             </>
           )}
 
           <div className="pt-4 border-t border-slate-900 mt-4">
-            <NavItem id="contact" icon={Mail} labelKey="contact" />
+            <NavItem path={userRole ? `/${userRole}/contact` : "/contact"} icon={Mail} labelKey="contact" />
           </div>
         </nav>
 
         <div className="mt-auto pt-6 opacity-20">
-          <p className="text-[10px] font-black uppercase italic text-center">Sousse Elite AI</p>
+          <p className="text-[10px] font-black uppercase italic text-center text-white">Sousse Elite AI</p>
         </div>
       </aside>
     </>
