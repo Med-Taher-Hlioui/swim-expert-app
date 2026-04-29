@@ -9,7 +9,7 @@ import confetti from 'canvas-confetti';
 
 // --- COMPONENT IMPORTS ---
 import Navbar from './components/Navbar';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/athlete/Dashboard';
 import LoginView from './components/auth/LoginView';
 import DrylandDeck from './components/DrylandDeck';
 import SquadCommand from './components/coach/SquadCommand';
@@ -24,10 +24,10 @@ import GearAudit from './components/parent/GearAudit';
 import DrillLibrary from './components/DrillLibrary';
 import CoachConsole from './components/CoachConsole';
 import SwimNews from './components/SwimNews';
-import NutritionDeck from './components/NutritionDeck';
+import NutritionDeck from './components/athlete/NutritionDeck';
 import Contact from './components/Contact';
-import RaceStrategy from './components/RaceStrategy';
-import GearLocker from './components/GearLocker';
+import RaceStrategy from './components/athlete/RaceStrategy';
+import GearLocker from './components/athlete/GearLocker';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 
 const engine = new SwimCoachEngine();
@@ -70,11 +70,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
-      {/* 3. Navbar now handles navigation internally via Links/Navigate */}
       <Navbar userRole={userRole} />
       
-      <header className="py-6 px-6 sticky top-0 z-40 bg-slate-950/50 backdrop-blur-sm flex justify-between items-center">
-        <LanguageSwitcher />
+      {/* LAYOUT FIX: Added 'ps-20' (Padding Start) 
+          This moves the language switcher to the right so it doesn't hide behind the Navbar button
+      */}
+      <header className="py-6 px-6 ps-24 sticky top-0 z-40 bg-slate-950/50 backdrop-blur-sm flex justify-between items-center border-b border-slate-900/10">
+        
+        <div className="flex items-center p-1 bg-slate-900/40 rounded-2xl border border-slate-800/50">
+          <LanguageSwitcher />
+        </div>
 
         <div className="flex items-center gap-6">
           <div className="text-start">
@@ -94,7 +99,6 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto p-6 pt-10 pb-20">
         
-        {/* 4. Implement the Routes Switch */}
         <Routes>
           {/* --- ATHLETE ROUTES --- */}
           {userRole === 'athlete' && (
