@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-// 1. Import Router Hooks
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Waves, 
@@ -25,25 +24,23 @@ import {
 } from 'lucide-react';
 import type { UserRole } from '../types/auth';
 
-// 2. Updated Props: We no longer need activePage or setActivePage here
 interface NavbarProps {
   userRole: UserRole;
 }
 
 export default function Navbar({ userRole }: NavbarProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate(); // Hook for changing the URL
-  const location = useLocation(); // Hook for checking the current URL
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  // 3. Updated NavItem: Now uses "path" and "location.pathname"
   const NavItem = ({ path, icon: Icon, labelKey }: { path: string, icon: any, labelKey: string }) => {
     const isActive = location.pathname === path;
     
     return (
       <button
         onClick={() => {
-          navigate(path); // Update the browser URL
+          navigate(path);
           setIsOpen(false);
         }}
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
@@ -131,6 +128,8 @@ export default function Navbar({ userRole }: NavbarProps) {
           {userRole === 'parent' && (
             <>
               <NavItem path="/parent/monitoring" icon={LayoutDashboard} labelKey="monitoring" />
+              {/* ADDED: Growth Tracking / Progress Deck */}
+              <NavItem path="/parent/analysis" icon={TrendingUp} labelKey="Growth Tracking" />
               <NavItem path="/parent/wellness" icon={HeartPulse} labelKey="wellness" />
               <NavItem path="/parent/gear_audit" icon={ClipboardCheck} labelKey="gear_audit" />
               <NavItem path="/parent/nutrition" icon={Utensils} labelKey="nutrition" />

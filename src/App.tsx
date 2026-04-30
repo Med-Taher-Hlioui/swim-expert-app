@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-// 1. Add these Router imports
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import type { UserRole } from './types/auth';
 import { SwimCoachEngine } from './lib/engine';
@@ -19,6 +18,7 @@ import AthleteLab from './components/coach/Analysis/AthleteLab';
 import ChronoDeck from './components/coach/Timing/ChronoDeck';
 import EliteBoard from './components/coach/Rankings/EliteBoard';
 import ParentHub from './components/parent/ParentHub'; 
+import ProgressDeck from './components/parent/ProgressDeck'; // New Subpage
 import WellnessMonitor from './components/parent/WellnessMonitor'; 
 import GearAudit from './components/parent/GearAudit'; 
 import DrillLibrary from './components/DrillLibrary';
@@ -41,7 +41,6 @@ export default function App() {
   const [userName, setUserName] = useState('');
   const [xp, setXp] = useState(1250);
 
-  // --- NUTRITION & HYDRATION STATE ---
   const [burned, setBurned] = useState(0);
   const [consumed, setConsumed] = useState(0);
   const [hydration, setHydration] = useState(0);
@@ -55,7 +54,6 @@ export default function App() {
     setUserRole(role);
     setUserName(name);
     
-    // 2. Use navigate() instead of setActivePage for initial login
     if (role === 'coach') navigate('/coach/squad');
     else if (role === 'parent') navigate('/parent/monitoring');
     else navigate('/athlete/pool');
@@ -72,11 +70,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
       <Navbar userRole={userRole} />
       
-      {/* LAYOUT FIX: Added 'ps-20' (Padding Start) 
-          This moves the language switcher to the right so it doesn't hide behind the Navbar button
-      */}
       <header className="py-6 px-6 ps-24 sticky top-0 z-40 bg-slate-950/50 backdrop-blur-sm flex justify-between items-center border-b border-slate-900/10">
-        
         <div className="flex items-center p-1 bg-slate-900/40 rounded-2xl border border-slate-800/50">
           <LanguageSwitcher />
         </div>
@@ -98,7 +92,6 @@ export default function App() {
       </header>
 
       <main className="max-w-7xl mx-auto p-6 pt-10 pb-20">
-        
         <Routes>
           {/* --- ATHLETE ROUTES --- */}
           {userRole === 'athlete' && (
@@ -136,9 +129,11 @@ export default function App() {
           {/* --- PARENT ROUTES --- */}
           {userRole === 'parent' && (
             <Route path="/parent">
-              <Route path="monitoring" element={<ParentHub />} /> 
+              <Route path="monitoring" element={<ParentHub setPage={(p) => navigate(`/parent/${p}`)} />} /> 
               <Route path="wellness" element={<WellnessMonitor />} />
               <Route path="gear_audit" element={<GearAudit />} />
+              {/* PROGRESS DECK (XP/Development tracker for parents) */}
+              <Route path="analysis" element={<ProgressDeck setPage={(p) => navigate(`/parent/${p}`)} />} />
               <Route path="nutrition" element={<NutritionDeck role="parent" burned={burned} consumed={consumed} hydration={hydration} setBurned={setBurned} setConsumed={setConsumed} setHydration={setHydration} />} />
               <Route path="news" element={<SwimNews />} />
               <Route path="contact" element={<Contact />} />
@@ -146,10 +141,8 @@ export default function App() {
             </Route>
           )}
 
-          {/* Global Fallback */}
           <Route path="*" element={<Navigate to={userRole ? `/${userRole}` : "/"} />} />
         </Routes>
-
       </main>
     </div>
   );
