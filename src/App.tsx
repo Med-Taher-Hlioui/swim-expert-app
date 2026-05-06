@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import type { UserRole } from './types/auth';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { SwimCoachEngine } from './lib/engine';
 import { calculateLevel } from './lib/xp'; 
 import confetti from 'canvas-confetti';
+import { useAuth } from './hooks/useAuth';
 
 // --- COMPONENT IMPORTS ---
 import Navbar from './components/Navbar';
@@ -18,7 +18,7 @@ import AthleteLab from './components/coach/Analysis/AthleteLab';
 import ChronoDeck from './components/coach/Timing/ChronoDeck';
 import EliteBoard from './components/coach/Rankings/EliteBoard';
 import ParentHub from './components/parent/ParentHub'; 
-import ProgressDeck from './components/parent/ProgressDeck'; // New Subpage
+import ProgressDeck from './components/parent/ProgressDeck';
 import WellnessMonitor from './components/parent/WellnessMonitor'; 
 import GearAudit from './components/parent/GearAudit'; 
 import DrillLibrary from './components/DrillLibrary';
@@ -35,11 +35,8 @@ const engine = new SwimCoachEngine();
 export default function App() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  const [userRole, setUserRole] = useState<UserRole>(null);
-  const [userName, setUserName] = useState('');
-  const [xp, setXp] = useState(1250);
+
+  const { userRole, userName, loading, login, signup, logout, xp, setXp } = useAuth();
 
   const [burned, setBurned] = useState(0);
   const [consumed, setConsumed] = useState(0);
@@ -50,21 +47,37 @@ export default function App() {
     if (key) engine.initialize(key);
   }, []);
 
-  const handleLogin = (role: Exclude<UserRole, null>, name: string) => {
-    setUserRole(role);
-    setUserName(name);
-    
-    if (role === 'coach') navigate('/coach/squad');
-    else if (role === 'parent') navigate('/parent/monitoring');
+  // Redirect after login based on role
+  useEffect(() => {
+    if (!userRole || loading) return;
+    if (userRole === 'coach') navigate('/coach/squad');
+    else if (userRole === 'parent') navigate('/parent/monitoring');
     else navigate('/athlete/pool');
 
     confetti({
       particleCount: 100, spread: 70, origin: { y: 0.8 },
       colors: ['#3b82f6', '#10b981', '#f97316']
     });
-  };
+  }, [userRole]);
 
-  if (!userRole) return <LoginView onLogin={handleLogin} />;
+  // --- LOADING SCREEN ---
+  if (loading) return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="space-y-4 text-center">
+        <div className="text-blue-500 font-black text-2xl uppercase italic animate-pulse">SwimExpert</div>
+        <div className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Loading...</div>
+      </div>
+    </div>
+  );
+
+  // --- LOGIN SCREEN ---
+  if (!userRole) return (
+    <LoginView
+      onLogin={() => {}}
+      onLoginSubmit={login}
+      onSignup={signup}
+    />
+  );
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
@@ -79,13 +92,16 @@ export default function App() {
           <div className="text-start">
             <div className="text-[9px] font-black uppercase text-slate-500 tracking-widest leading-none mb-1">{userName}</div>
             <div className="flex items-center gap-2 justify-end">
-               <span className={`w-2 h-2 rounded-full animate-pulse ${userRole === 'coach' ? 'bg-purple-500' : userRole === 'parent' ? 'bg-orange-500' : 'bg-blue-500'}`}></span>
-               <div className="text-xs font-black italic uppercase text-white tracking-tighter">
+              <span className={`w-2 h-2 rounded-full animate-pulse ${userRole === 'coach' ? 'bg-purple-500' : userRole === 'parent' ? 'bg-orange-500' : 'bg-blue-500'}`}></span>
+              <div className="text-xs font-black italic uppercase text-white tracking-tighter">
                 {t(userRole)} {t('ui.mode')}
-               </div>
+              </div>
             </div>
           </div>
-          <button onClick={() => { setUserRole(null); navigate('/'); }} className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-[8px] font-black hover:border-red-500 transition-all text-slate-500 hover:text-red-500 group">
+          <button
+            onClick={() => { logout(); navigate('/'); }}
+            className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-[8px] font-black hover:border-red-500 transition-all text-slate-500 hover:text-red-500 group"
+          >
             <span className="group-hover:scale-110 transition-transform">{t('ui.out')}</span>
           </button>
         </div>
@@ -132,7 +148,6 @@ export default function App() {
               <Route path="monitoring" element={<ParentHub setPage={(p) => navigate(`/parent/${p}`)} />} /> 
               <Route path="wellness" element={<WellnessMonitor />} />
               <Route path="gear_audit" element={<GearAudit />} />
-              {/* PROGRESS DECK (XP/Development tracker for parents) */}
               <Route path="analysis" element={<ProgressDeck setPage={(p) => navigate(`/parent/${p}`)} />} />
               <Route path="nutrition" element={<NutritionDeck role="parent" burned={burned} consumed={consumed} hydration={hydration} setBurned={setBurned} setConsumed={setConsumed} setHydration={setHydration} />} />
               <Route path="news" element={<SwimNews />} />
