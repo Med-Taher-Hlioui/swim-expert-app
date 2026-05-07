@@ -1,44 +1,57 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '../../../lib/supabase';
+import toast from 'react-hot-toast';
 import { 
   Timer, Play, Square, RotateCcw, ChevronRight, 
-  Settings2, Share2, Volume2, Save, Users, Plus, X, UserPlus, Check, Trash2 
+  Settings2, Share2, Save, Plus, X, UserPlus, Check, Trash2, Loader2
 } from 'lucide-react';
 
 interface LaneState {
   id: number;
   athleteName: string;
+  athleteId?: string;
   time: number;
   lastSplit: number;
   isActive: boolean;
   repCount: number;
 }
 
-const MOCK_ATHLETES = ['Ahmed Derbel', 'Sarra Mansour', 'Yassine Ben Amor', 'Rayen Feki', 'Sami Toumi', 'Lina Ben Salem'];
+interface AthleteProfile {
+  id: string;
+  name: string;
+}
 
 export default function ChronoDeck() {
   const { t } = useTranslation();
   
-  // --- TIMER STATE ---
   const [globalTime, setGlobalTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  
-  // --- MODAL STATES ---
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // --- INTERVAL CONFIG ---
   const [config, setConfig] = useState({
-    reps: 10,
-    distance: 100,
-    minutes: 1,
-    seconds: 25
+    reps: 10, distance: 100, minutes: 1, seconds: 25
   });
 
-  // --- DYNAMIC LANES STATE ---
   const [lanes, setLanes] = useState<LaneState[]>([
     { id: 1, athleteName: '', time: 0, lastSplit: 0, isActive: false, repCount: 0 }
   ]);
+
+  const [athletes, setAthletes] = useState<AthleteProfile[]>([]);
+
+  // --- FETCH REAL ATHLETES ---
+  useEffect(() => {
+    async function fetchAthletes() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .eq('role', 'athlete');
+      if (!error && data) setAthletes(data);
+    }
+    fetchAthletes();
+  }, []);
 
   useEffect(() => {
     let interval: any;
@@ -60,32 +73,71 @@ export default function ChronoDeck() {
 
   const handleStartSet = () => {
     if (lanes.every(l => l.athleteName === '')) {
-      alert("Please assign at least one athlete before starting.");
+      toast.error('Assign at least one athlete first!');
       return;
     }
     setIsRunning(true);
     setLanes(lanes.map(l => ({ ...l, isActive: true })));
+    toast.success('Session started!');
   };
 
   const handleReset = () => {
     setIsRunning(false);
     setGlobalTime(0);
     setLanes(lanes.map(l => ({ ...l, time: 0, lastSplit: 0, isActive: false, repCount: 0 })));
+    toast('Timer reset', { icon: '🔄' });
   };
 
   const handleLaneTap = (laneId: number) => {
     if (!isRunning) return;
     setLanes(lanes.map(l => {
       if (l.id === laneId) {
+        const newRep = Math.min(l.repCount + 1, config.reps);
+        if (newRep === config.reps) toast.success(`${l.athleteName} finished all reps! 🏊`);
         return {
           ...l,
           lastSplit: globalTime - l.time,
           time: globalTime,
-          repCount: Math.min(l.repCount + 1, config.reps)
+          repCount: newRep
         };
       }
       return l;
     }));
+  };
+
+  // --- SAVE SESSION TO SUPABASE ---
+  const handleSaveSession = async () => {
+    const activeLanes = lanes.filter(l => l.athleteName && l.repCount > 0);
+    if (activeLanes.length === 0) {
+      toast.error('No timing data to save!');
+      return;
+    }
+
+    setSaving(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { setSaving(false); return; }
+
+    const logs = activeLanes.map(lane => ({
+      coach_id: session.user.id,
+      athlete_name: lane.athleteName,
+      lane_id: lane.id,
+      distance: config.distance,
+      reps: config.reps,
+      split_time: lane.lastSplit,
+      total_time: lane.time,
+      rep_count: lane.repCount,
+    }));
+
+    const { error } = await supabase
+      .from('timing_logs')
+      .insert(logs);
+
+    if (!error) {
+      toast.success('Session saved to Athlete Lab! 🏆');
+    } else {
+      toast.error('Failed to save session');
+    }
+    setSaving(false);
   };
 
   const addLane = () => {
@@ -94,13 +146,16 @@ export default function ChronoDeck() {
   };
 
   const removeLane = (id: number) => {
-    if (lanes.length > 1) {
-      setLanes(lanes.filter(l => l.id !== id));
-    }
+    if (lanes.length > 1) setLanes(lanes.filter(l => l.id !== id));
   };
 
-  const assignAthlete = (laneId: number, name: string) => {
-    setLanes(lanes.map(l => l.id === laneId ? { ...l, athleteName: name } : l));
+  const assignAthlete = (laneId: number, athleteId: string) => {
+    const athlete = athletes.find(a => a.id === athleteId);
+    setLanes(lanes.map(l => l.id === laneId ? { 
+      ...l, 
+      athleteName: athlete?.name || '',
+      athleteId 
+    } : l));
   };
 
   return (
@@ -123,11 +178,17 @@ export default function ChronoDeck() {
         </div>
 
         <div className="flex gap-3">
-          <button onClick={handleReset} className="w-12 h-12 rounded-full border border-slate-800 text-slate-500 hover:text-white flex items-center justify-center transition-all"><RotateCcw size={20} /></button>
+          <button onClick={handleReset} className="w-12 h-12 rounded-full border border-slate-800 text-slate-500 hover:text-white flex items-center justify-center transition-all">
+            <RotateCcw size={20} />
+          </button>
           {!isRunning ? (
-            <button onClick={handleStartSet} className="bg-blue-600 text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-lg"><Play size={16} fill="currentColor" /> {t('chrono.start_set')}</button>
+            <button onClick={handleStartSet} className="bg-blue-600 text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-lg">
+              <Play size={16} fill="currentColor" /> {t('chrono.start_set')}
+            </button>
           ) : (
-            <button onClick={() => setIsRunning(false)} className="bg-red-600 text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-lg"><Square size={16} fill="currentColor" /> {t('chrono.stop')}</button>
+            <button onClick={() => setIsRunning(false)} className="bg-red-600 text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-lg">
+              <Square size={16} fill="currentColor" /> {t('chrono.stop')}
+            </button>
           )}
         </div>
       </div>
@@ -151,7 +212,7 @@ export default function ChronoDeck() {
         </button>
       </div>
 
-      {/* 3. DYNAMIC LANE TIMING GRID */}
+      {/* 3. LANE TIMING GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {lanes.map((lane) => (
           <button
@@ -180,13 +241,15 @@ export default function ChronoDeck() {
               </h5>
             </div>
 
-            <div className="absolute bottom-0 right-0 p-4 z-10 opacity-20 group-hover:opacity-100 transition-opacity"><ChevronRight size={40} className="text-blue-500" /></div>
+            <div className="absolute bottom-0 right-0 p-4 z-10 opacity-20 group-hover:opacity-100 transition-opacity">
+              <ChevronRight size={40} className="text-blue-500" />
+            </div>
             <div className="absolute right-[-20px] bottom-[-20px] text-[10rem] font-black italic text-white opacity-[0.02] pointer-events-none uppercase">{lane.id}</div>
           </button>
         ))}
       </div>
 
-      {/* 4. FOOTER ACTIONS - RESTORED & INTEGRATED */}
+      {/* 4. FOOTER ACTIONS */}
       <div className="flex flex-col md:flex-row justify-between items-center bg-slate-900/50 border border-slate-800 p-6 rounded-[2.5rem] gap-4">
         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 italic">
           <Check size={16} className="text-green-500" />
@@ -197,15 +260,17 @@ export default function ChronoDeck() {
             <Share2 size={14} /> {t('share')}
           </button>
           <button 
-            onClick={() => alert("Splits pushed to Athlete Lab archive.")}
-            className="flex-1 md:flex-none bg-green-600 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-green-500 transition-all shadow-lg shadow-green-900/20"
+            onClick={handleSaveSession}
+            disabled={saving}
+            className="flex-1 md:flex-none bg-green-600 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-green-500 transition-all shadow-lg shadow-green-900/20 disabled:opacity-50"
           >
-            <Save size={14} /> {t('save')}
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            {t('save')}
           </button>
         </div>
       </div>
 
-      {/* --- CONFIG MODAL --- */}
+      {/* CONFIG MODAL */}
       {isConfigOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[100] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300">
           <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-[3rem] p-10 relative shadow-2xl">
@@ -230,13 +295,15 @@ export default function ChronoDeck() {
                   <input type="number" value={config.seconds} onChange={(e) => setConfig({...config, seconds: parseInt(e.target.value)})} className="flex-1 bg-slate-950 border border-slate-800 p-4 rounded-2xl text-xs font-bold text-white text-center outline-none focus:border-blue-500" />
                 </div>
               </div>
-              <button onClick={() => setIsConfigOpen(false)} className="w-full bg-blue-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest mt-4 shadow-lg shadow-blue-900/40">{t('chrono.apply_config')}</button>
+              <button onClick={() => { setIsConfigOpen(false); toast.success('Config applied!'); }} className="w-full bg-blue-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest mt-4 shadow-lg shadow-blue-900/40">
+                {t('chrono.apply_config')}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* --- ASSIGN SWIMMERS MODAL --- */}
+      {/* ASSIGN SWIMMERS MODAL */}
       {isAssignOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[100] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300">
           <div className="w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-[3rem] p-10 relative shadow-2xl flex flex-col max-h-[90vh]">
@@ -249,19 +316,34 @@ export default function ChronoDeck() {
                   <div className="w-10 h-10 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-500 font-black italic">{lane.id}</div>
                   <div className="flex-1 text-start">
                     <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1">Assign Swimmer</p>
-                    <select value={lane.athleteName} onChange={(e) => assignAthlete(lane.id, e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs font-bold text-white outline-none focus:border-blue-500">
+                    <select 
+                      value={lane.athleteId || ''} 
+                      onChange={(e) => assignAthlete(lane.id, e.target.value)} 
+                      className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs font-bold text-white outline-none focus:border-blue-500"
+                    >
                       <option value="">Select Athlete...</option>
-                      {MOCK_ATHLETES.map(name => <option key={name} value={name}>{name}</option>)}
+                      {athletes.map(a => (
+                        <option key={a.id} value={a.id}>{a.name}</option>
+                      ))}
                     </select>
                   </div>
-                  <button onClick={() => removeLane(lane.id)} className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all mt-4"><Trash2 size={16} /></button>
+                  <button onClick={() => removeLane(lane.id)} className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all mt-4">
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               ))}
             </div>
 
             <div className="pt-8 space-y-3">
-              <button onClick={addLane} className="w-full bg-slate-950 border border-slate-800 text-slate-400 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-blue-500 hover:text-white transition-all flex items-center justify-center gap-2"><Plus size={16} /> Add Another Lane</button>
-              <button onClick={() => setIsAssignOpen(false)} className="w-full bg-blue-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-900/40">{t('chrono.confirm_assign')}</button>
+              <button onClick={addLane} className="w-full bg-slate-950 border border-slate-800 text-slate-400 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-blue-500 hover:text-white transition-all flex items-center justify-center gap-2">
+                <Plus size={16} /> Add Another Lane
+              </button>
+              <button 
+                onClick={() => { setIsAssignOpen(false); toast.success('Athletes assigned!'); }} 
+                className="w-full bg-blue-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-900/40"
+              >
+                {t('chrono.confirm_assign')}
+              </button>
             </div>
           </div>
         </div>
